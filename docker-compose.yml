@@ -1,0 +1,168 @@
+services:
+
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: unless-stopped
+    environment:
+      WEBSOCKET_ENABLED: "true"
+      SIGNUPS_ALLOWED: "true"
+      ADMIN_TOKEN: ${VAULTWARDEN_ADMIN_TOKEN}
+      DOMAIN: ${VAULTWARDEN_DOMAIN}
+      ROCKET_ADDRESS: "0.0.0.0"
+    volumes:
+      - /mnt/storage/vaultwarden/data:/data
+    ports:
+      - "8080:80"
+    networks:
+      - proxy
+
+  adguardhome:
+    image: adguard/adguardhome:latest
+    container_name: adguardhome
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - /mnt/storage/adguardhome/work:/opt/adguardhome/work
+      - /mnt/storage/adguardhome/conf:/opt/adguardhome/conf
+
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: npm
+    restart: unless-stopped
+    ports:
+      - "8082:80"
+      - "81:81"
+      - "443:443"
+    volumes:
+      - ./npm/data:/data
+      - ./npm/letsencrypt:/etc/letsencrypt
+    networks:
+      - proxy
+
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    restart: unless-stopped
+    ports:
+      - "3002:3000"
+    environment:
+      HOMEPAGE_ALLOWED_HOSTS: "*"
+    volumes:
+      - /mnt/storage/homepage/config:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - proxy
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    container_name: uptime-kuma
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - /mnt/storage/uptime-kuma:/app/data
+    networks:
+      - proxy
+
+  portainer:
+    image: portainer/portainer-ce:lts
+    container_name: portainer
+    restart: unless-stopped
+    ports:
+      - "51200:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /mnt/storage/portainer:/data
+    networks:
+      - proxy
+
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    network_mode: host
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - /mnt/storage/jellyfin/config:/config
+      - /mnt/storage/jellyfin/cache:/cache
+      - /mnt/Storage1/media:/media
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+    ports:
+      - "9696:9696"
+    volumes:
+      - /mnt/storage/prowlarr:/config
+    networks:
+      - proxy
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+    ports:
+      - "7878:7878"
+    volumes:
+      - /mnt/storage/radarr:/config
+      - /mnt/Storage1/media:/media
+    networks:
+      - proxy
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+    ports:
+      - "8989:8989"
+    volumes:
+      - /mnt/storage/sonarr:/config
+      - /mnt/Storage1/media:/media
+    networks:
+      - proxy
+
+  seerr:
+    image: ghcr.io/seerr-team/seerr:latest
+    container_name: seerr
+    init: true
+    restart: unless-stopped
+    ports:
+      - "5055:5055"
+    volumes:
+      - /mnt/storage/jellyseerr:/app/config
+    networks:
+      - proxy
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - WEBUI_PORT=8085
+    ports:
+      - "8085:8085"
+      - "6881:6881/tcp"
+      - "6881:6881/udp"
+    volumes:
+      - /mnt/storage/qbittorrent:/config
+      - /mnt/Storage1/media:/media
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
