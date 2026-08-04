@@ -134,7 +134,7 @@ README.md
 - AdGuard Home
 - Nginx Proxy Manager
 - Homepage
-- Portainer
+- Arcane
 - Uptime Kuma
 - Jellyfin
 - Sonarr
