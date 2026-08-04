@@ -38,7 +38,7 @@ Authentik
 ─────────────────────────
 │         │          │
 │         │          └── AdGuard Home
-│         └───────────── Portainer
+│         └───────────── Arcane
 └────────────────────── Jellyfin
                           │
                     Arr Stack
