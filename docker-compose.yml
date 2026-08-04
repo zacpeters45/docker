@@ -65,17 +65,24 @@ services:
     networks:
       - proxy
 
-  portainer:
-    image: portainer/portainer-ce:lts
-    container_name: portainer
+arcane:
+    image: ghcr.io/getarcaneapp/manager:latest
+    container_name: arcane
     restart: unless-stopped
     ports:
-      - "51200:9443"
+      - "51200:3552"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /mnt/storage/portainer:/data
+    environment:
+      - APP_URL=http://localhost:51200
+      - PUID=1000
+      - PGID=1000
+      - ENCRYPTION_KEY=--
+      - JWT_SECRET=--
     networks:
       - proxy
+
 
   jellyfin:
     image: jellyfin/jellyfin:latest
